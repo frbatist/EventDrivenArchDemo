@@ -38,6 +38,15 @@ namespace EventDrivenArchDemo.Api.Data
                 new Book { Id = 6, Title = "Adventures of Huckleberry Finn", AuthorId = 4 },
                 new Book { Id = 7, Title = "Murder on the Orient Express", AuthorId = 5 }
             );
+
+            // Seed Clients
+            modelBuilder.Entity<Client>().HasData(
+                new Client { Id = 1, Name = "Alice Johnson" },
+                new Client { Id = 2, Name = "Bob Smith" },
+                new Client { Id = 3, Name = "Charlie Brown" },
+                new Client { Id = 4, Name = "Diana Prince" },
+                new Client { Id = 5, Name = "Ethan Hunt" }
+            );
         }
     }
 }
