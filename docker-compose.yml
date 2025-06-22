@@ -1,0 +1,19 @@
+services:
+  eventdrivenarchdemo.api:
+    image: ${DOCKER_REGISTRY-}eventdrivenarchdemoapi
+    build:
+      context: .
+      dockerfile: EventDrivenArchDemo.Api/Dockerfile
+    depends_on:
+      - sqlserver
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=BookRentalShopDb;User=sa;Password=Book@1234;TrustServerCertificate=True
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Book@1234
+      - MSSQL_PID=Express
+    ports:
+      - "1433:1433"
