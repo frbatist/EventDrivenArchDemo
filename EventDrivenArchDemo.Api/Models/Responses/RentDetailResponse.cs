@@ -1,4 +1,4 @@
-﻿namespace EventDrivenArchDemo.Api.Models
+﻿namespace EventDrivenArchDemo.Api.Models.Responses
 {
     public class RentDetailResponse
     {

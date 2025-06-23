@@ -6,8 +6,12 @@ services:
       dockerfile: EventDrivenArchDemo.Api/Dockerfile
     depends_on:
       - sqlserver
+      - rabbitmq
     environment:
       - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=BookRentalShopDb;User=sa;Password=Book@1234;TrustServerCertificate=True
+      - RabbitMQ__HostName=rabbitmq
+      - RabbitMQ__UserName=guest
+      - RabbitMQ__Password=guest
 
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
@@ -17,3 +21,12 @@ services:
       - MSSQL_PID=Express
     ports:
       - "1433:1433"
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest

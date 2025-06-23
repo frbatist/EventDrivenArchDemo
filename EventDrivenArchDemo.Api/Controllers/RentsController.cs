@@ -1,6 +1,9 @@
 ﻿using EventDrivenArchDemo.Api.Data;
 using EventDrivenArchDemo.Api.Domain;
-using EventDrivenArchDemo.Api.Models;
+using EventDrivenArchDemo.Api.Domain.Messaging;
+using EventDrivenArchDemo.Api.Models.Events;
+using EventDrivenArchDemo.Api.Models.Requests;
+using EventDrivenArchDemo.Api.Models.Responses;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,10 +14,12 @@ namespace EventDrivenArchDemo.Api.Controllers
     public class RentsController : ControllerBase
     {
         private readonly BookRentalShopContext _context;
+        private readonly IMessagePublisher _messagePublisher;
 
-        public RentsController(BookRentalShopContext context)
+        public RentsController(BookRentalShopContext context, IMessagePublisher messagePublisher)
         {
             _context = context;
+            _messagePublisher=messagePublisher;
         }
 
         [HttpPost]
@@ -39,6 +44,14 @@ namespace EventDrivenArchDemo.Api.Controllers
             _context.Rents.Add(rent);
             await _context.SaveChangesAsync();
 
+            // Publish event
+            var rentCreatedEvent = new RentCreatedEvent
+            {
+                Id = rent.Id,                
+            };
+
+            await _messagePublisher.PublishAsync("RentCreated", "", rentCreatedEvent);
+
             return CreatedAtAction(nameof(Post), new { id = rent.Id }, rent);
         }
 
@@ -61,6 +74,7 @@ namespace EventDrivenArchDemo.Api.Controllers
 
             return Ok(rents);
         }
+
         [HttpGet("{id}")]
         public async Task<ActionResult<RentDetailResponse>> GetById(int id)
         {
