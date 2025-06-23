@@ -4,14 +4,19 @@ services:
     build:
       context: .
       dockerfile: EventDrivenArchDemo.Api/Dockerfile
+    ports:
+      - "5000:80"
     depends_on:
-      - sqlserver
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
+      sqlserver:
+        condition: service_started
     environment:
       - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=BookRentalShopDb;User=sa;Password=Book@1234;TrustServerCertificate=True
       - RabbitMQ__HostName=rabbitmq
       - RabbitMQ__UserName=guest
       - RabbitMQ__Password=guest
+      - ASPNETCORE_URLS=http://0.0.0.0:80 
 
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
@@ -30,6 +35,12 @@ services:
     environment:
       - RABBITMQ_DEFAULT_USER=guest
       - RABBITMQ_DEFAULT_PASS=guest
+    healthcheck:
+      test: ["CMD", "sh", "-c", "rabbitmq-diagnostics check_port_connectivity && rabbitmq-diagnostics check_running"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
 
   eventdrivenarchdemo.functions:
     image: ${DOCKER_REGISTRY-}eventdrivenarchdemofunctions
@@ -37,8 +48,23 @@ services:
       context: .
       dockerfile: EventDrivenArchDemo.Functions/Dockerfile
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
+      cosmosdb:
+        condition: service_started
     environment:
-      - RabbitMQ__HostName=rabbitmq
-      - RabbitMQ__UserName=guest
-      - RabbitMQ__Password=guest
+      - RabbitMQ=amqp://guest:guest@rabbitmq:5672/
+      - CosmosDb=AccountEndpoint=https://cosmosdb:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==;DisableServerCertificateValidation=true  
+  
+  cosmosdb:
+    image: mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator
+    container_name: cosmosdb
+    environment:
+      AZURE_COSMOS_EMULATOR_PARTITION_COUNT: 10
+      AZURE_COSMOS_EMULATOR_ENABLE_DATA_PERSISTENCE: "true"
+      AZURE_COSMOS_EMULATOR_IP_ADDRESS_OVERRIDE: "0.0.0.0"
+    ports:
+      - "8081:8081"   # HTTPS endpoint
+      - "10251-10255:10251-10255" # Required for emulator
+    tty: true
+    stdin_open: true
