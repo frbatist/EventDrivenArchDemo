@@ -61,5 +61,27 @@ namespace EventDrivenArchDemo.Api.Controllers
 
             return Ok(rents);
         }
+        [HttpGet("{id}")]
+        public async Task<ActionResult<RentDetailResponse>> GetById(int id)
+        {
+            var rent = await _context.Rents
+                .Where(r => r.Id == id)
+                .Select(r => new RentDetailResponse
+                {
+                    RentId = r.Id,
+                    BookId = r.Book.Id,
+                    BookTitle = r.Book.Title,
+                    AuthorId = r.Book.AuthorId,
+                    AuthorName = r.Book.Author != null ? r.Book.Author.Name : string.Empty,
+                    ClientId = r.Client.Id,
+                    ClientName = r.Client.Name
+                })
+                .FirstOrDefaultAsync();
+
+            if (rent == null)
+                return NotFound();
+
+            return Ok(rent);
+        }
     }
 }
