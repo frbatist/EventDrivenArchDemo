@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35825.156 d17.13
+VisualStudioVersion = 17.13.35825.156
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventDrivenArchDemo.Api", "EventDrivenArchDemo.Api\EventDrivenArchDemo.Api.csproj", "{C368F172-28A7-442C-BB70-A0619E0E17D8}"
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{81DDED9D-158B-E303-5F62-77A2896D2A5A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventDrivenArchDemo.Functions", "EventDrivenArchDemo.Functions\EventDrivenArchDemo.Functions.csproj", "{B7B779C9-142C-4456-8EE9-F20DDB858956}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B7B779C9-142C-4456-8EE9-F20DDB858956}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B7B779C9-142C-4456-8EE9-F20DDB858956}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B7B779C9-142C-4456-8EE9-F20DDB858956}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B7B779C9-142C-4456-8EE9-F20DDB858956}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

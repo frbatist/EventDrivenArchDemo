@@ -25,20 +25,20 @@ namespace EventDrivenArchDemo.Api.Infra.Messaging
                 Password = rabbitConfig["Password"]
             };
 
-            await using var connection = await factory.CreateConnectionAsync();
-            await using var channel = await connection.CreateChannelAsync();
+            using var connection = await factory.CreateConnectionAsync();
+            using var channel = await connection.CreateChannelAsync();
 
             var message = JsonSerializer.Serialize(payload);
             var body = Encoding.UTF8.GetBytes(message);
 
-            var properties = channel.CreateBasicProperties();
-            properties.Persistent = true;
+            var props = new BasicProperties();
+            props.Persistent = true;
 
             await channel.BasicPublishAsync(
                 exchange: exchange,
                 routingKey: routingKey,
                 mandatory: false,
-                basicProperties: properties,
+                basicProperties: props,
                 body: body
             );
         }

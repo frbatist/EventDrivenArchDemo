@@ -23,19 +23,19 @@ namespace EventDrivenArchDemo.Api.Infra.Messaging
                 durable: true
             );
 
-            //await channel.QueueDeclareAsync(
-            //    queue: "RentCreated_LibraryReportsFunction",
-            //    durable: true,
-            //    exclusive: false,
-            //    autoDelete: false,
-            //    arguments: null
-            //);
+            await channel.QueueDeclareAsync(
+                queue: "RentCreated_LibraryReportsFunction",
+                durable: true,
+                exclusive: false,
+                autoDelete: false,
+                arguments: null
+            );
 
-            //await channel.QueueBindAsync(
-            //    queue: "RentCreated_LibraryReportsFunction",
-            //    exchange: "RentCreated",
-            //    routingKey: "#"
-            //);
+            await channel.QueueBindAsync(
+                queue: "RentCreated_LibraryReportsFunction",
+                exchange: "RentCreated",
+                routingKey: "#"
+            );
         }
     }
 }

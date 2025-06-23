@@ -1,0 +1,15 @@
+{
+  "profiles": {
+    "EventDrivenArchDemo.Functions": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7105"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker",
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
+      "containerRunArguments": "--init",
+      "httpPort": 33464,
+      "useSSL": false
+    }
+  }
+}

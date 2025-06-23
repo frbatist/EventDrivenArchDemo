@@ -30,3 +30,15 @@ services:
     environment:
       - RABBITMQ_DEFAULT_USER=guest
       - RABBITMQ_DEFAULT_PASS=guest
+
+  eventdrivenarchdemo.functions:
+    image: ${DOCKER_REGISTRY-}eventdrivenarchdemofunctions
+    build:
+      context: .
+      dockerfile: EventDrivenArchDemo.Functions/Dockerfile
+    depends_on:
+      - rabbitmq
+    environment:
+      - RabbitMQ__HostName=rabbitmq
+      - RabbitMQ__UserName=guest
+      - RabbitMQ__Password=guest
