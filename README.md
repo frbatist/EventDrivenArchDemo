@@ -72,7 +72,7 @@ cd EventDrivenArchDemo
 
 1. Start the entire application stack using Docker Compose:
 ```bash
-docker-compose up -d
+docker compose up -d (you can use docker-compose command if running docker compose 1.0)
 ```
 
 2. The application will start with:
@@ -89,7 +89,7 @@ docker-compose up -d
 
 4. To stop the application:
 ```bash
-docker-compose down
+docker compose down (you can use docker-compose command if running docker compose 1.0)
 ```
 
 ## Project Structure
