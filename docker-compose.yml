@@ -10,6 +10,7 @@ services:
       sqlserver:
         condition: service_started
     environment:
+      - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=BookRentalShopDb.Authentication;User=sa;Password=Book@1234;TrustServerCertificate=True;MultipleActiveResultSets=true
       - ASPNETCORE_URLS=https://+:443;http://+:80
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
@@ -30,6 +31,7 @@ services:
       sqlserver:
         condition: service_started
     environment:
+      - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=BookRentalShopDb;User=sa;Password=Book@1234;TrustServerCertificate=True
       - RabbitMQ__HostName=rabbitmq
       - RabbitMQ__UserName=guest

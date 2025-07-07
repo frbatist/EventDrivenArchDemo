@@ -24,6 +24,7 @@
     <PackageReference Include="OpenIddict.AspNetCore" Version="6.4.0" />
     <PackageReference Include="OpenIddict.EntityFrameworkCore" Version="6.4.0" />
     <PackageReference Include="OpenIddict.Validation.AspNetCore" Version="6.4.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="9.0.0" />
   </ItemGroup>
 
 </Project>

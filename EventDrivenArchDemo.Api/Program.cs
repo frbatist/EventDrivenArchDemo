@@ -20,7 +20,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<BookRentalShopContext>();
-    db.Database.EnsureCreated();    
+    db.Database.Migrate();
 }
 
 await RabbitMqInitializer.InitializeAsync(app.Configuration);
