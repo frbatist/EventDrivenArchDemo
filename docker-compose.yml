@@ -15,6 +15,7 @@ services:
       - ASPNETCORE_URLS=https://+:443;http://+:80
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
       - ASPNETCORE_Kestrel__Certificates__Default__Password=UnbreakableTitaniumPassword
+      - ISSUER_URL=https://localhost:5003
     volumes:
       - ./certs:/https:ro
 
@@ -36,7 +37,9 @@ services:
       - RabbitMQ__HostName=rabbitmq
       - RabbitMQ__UserName=guest
       - RabbitMQ__Password=guest
-      - ASPNETCORE_URLS=http://0.0.0.0:80 
+      - ASPNETCORE_URLS=http://+:8080
+      - AUTH_SERVER_URL=https://localhost:5003
+    network_mode: "host"
 
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest

@@ -23,6 +23,8 @@ builder.Services.AddRazorPages();
 builder.Services.AddAuthentication();
 builder.Services.AddAuthorization();
 
+var issuerUrl = builder.Configuration["ISSUER_URL"] ?? "https://localhost:5003";
+
 builder.Services.AddOpenIddict()
     .AddCore(options =>
     {
@@ -31,22 +33,37 @@ builder.Services.AddOpenIddict()
     })
     .AddServer(options =>
     {
-        options.SetTokenEndpointUris("/connect/token");
+
+        options.SetIssuer(new Uri(issuerUrl));
+
+        //    options.SetIssuer(new Uri(issuerUrl))
+        //.SetTokenEndpointUris($"{issuerUrl}/connect/token")
+        //.SetUserInfoEndpointUris($"{issuerUrl}/connect/userinfo")
+        //.SetAuthorizationEndpointUris($"{issuerUrl}//connect/authorize")
+        //.SetIntrospectionEndpointUris($"{issuerUrl}/connect/introspect")
+        //.SetRevocationEndpointUris($"{issuerUrl}/connect/revoke")
+        //.SetJsonWebKeySetEndpointUris($"{issuerUrl}/.well-known/jwks");
+
+        options.SetTokenEndpointUris("connect/token");
         options.SetUserInfoEndpointUris("connect/userinfo");
         options.SetAuthorizationEndpointUris("/connect/authorize");        
         options.SetIntrospectionEndpointUris("connect/introspect");
         options.SetRevocationEndpointUris("connect/revoke");
-        options.AllowAuthorizationCodeFlow().AllowRefreshTokenFlow();
+        options.AllowAuthorizationCodeFlow().AllowRefreshTokenFlow();        
         options.RegisterScopes("openid", "profile", "email");
+
+
+
         
         options.UseAspNetCore()
                .EnableTokenEndpointPassthrough()
                .EnableAuthorizationEndpointPassthrough()
-               .EnableUserInfoEndpointPassthrough()
+               .EnableUserInfoEndpointPassthrough()               
                .EnableStatusCodePagesIntegration();
 
         options.AddDevelopmentEncryptionCertificate()
                .AddDevelopmentSigningCertificate();
+
     })
     .AddValidation(options =>
     {

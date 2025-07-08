@@ -4,6 +4,7 @@ using EventDrivenArchDemo.Api.Domain.Messaging;
 using EventDrivenArchDemo.Api.Models.Events;
 using EventDrivenArchDemo.Api.Models.Requests;
 using EventDrivenArchDemo.Api.Models.Responses;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,6 +12,7 @@ namespace EventDrivenArchDemo.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class RentsController : ControllerBase
     {
         private readonly BookRentalShopContext _context;

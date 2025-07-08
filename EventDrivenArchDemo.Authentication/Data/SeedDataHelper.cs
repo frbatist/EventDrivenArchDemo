@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using OpenIddict.Abstractions;
+using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace EventDrivenArchDemo.Authentication.Data
 {
@@ -21,31 +22,69 @@ namespace EventDrivenArchDemo.Authentication.Data
                     var user = new IdentityUser { UserName = adminEmail, Email = adminEmail, EmailConfirmed = true };
                     await userManager.CreateAsync(user, adminPassword);
                 }
+            }           
+            
+            var scopeManager = scope.ServiceProvider.GetRequiredService<IOpenIddictScopeManager>();
+
+            var apiClientId = config["Seed:ApiClient:ClientId"];
+            var apiClientSecret = config["Seed:ApiClient:ClientSecret"];
+            if (!string.IsNullOrWhiteSpace(apiClientId) && !string.IsNullOrWhiteSpace(apiClientSecret))
+            {
+                // Create API scope
+                if (await scopeManager.FindByNameAsync(apiClientId) == null)
+                {
+                    await scopeManager.CreateAsync(new OpenIddictScopeDescriptor
+                    {
+                        Name = apiClientId,
+                        DisplayName = apiClientId,
+                        Resources = { apiClientId }
+                    });
+                }
+
+                var apiClient = await appManager.FindByClientIdAsync(apiClientId);
+                if (apiClient != null)
+                {
+                    await appManager.DeleteAsync(apiClient);
+                }
+
+                await appManager.CreateAsync(new OpenIddictApplicationDescriptor
+                {
+                    ClientId = apiClientId,
+                    ClientSecret = apiClientSecret,
+                    ConsentType = ConsentTypes.Implicit,
+                    DisplayName = "EventDrivenArchDemo API Client",
+                    Permissions =
+                    {
+                        Permissions.Endpoints.Introspection
+                    }
+                });
             }
 
+
             // Postman OIDC client
-            var clientId = config["Seed:PostmanClient:ClientId"];
-            var clientSecret = config["Seed:PostmanClient:ClientSecret"];
-            if (!string.IsNullOrWhiteSpace(clientId) && !string.IsNullOrWhiteSpace(clientSecret))
+            var postmanClientId = config["Seed:PostmanClient:ClientId"];
+            var postmanClientSecret = config["Seed:PostmanClient:ClientSecret"];
+            if (!string.IsNullOrWhiteSpace(postmanClientId) && !string.IsNullOrWhiteSpace(postmanClientSecret))
             {
-                if (await appManager.FindByClientIdAsync(clientId) == null)
+                if (await appManager.FindByClientIdAsync(postmanClientId) == null)
                 {
                     await appManager.CreateAsync(new OpenIddictApplicationDescriptor
                     {
-                        ClientId = clientId,
-                        ClientSecret = clientSecret,
+                        ClientId = postmanClientId,
+                        ClientSecret = postmanClientSecret,
                         DisplayName = "Postman",
                         Permissions =
                         {
-                            OpenIddictConstants.Permissions.Endpoints.Token,
-                            OpenIddictConstants.Permissions.Endpoints.Authorization,
-                            OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode,
-                            OpenIddictConstants.Permissions.ResponseTypes.Code,
-                            OpenIddictConstants.Permissions.GrantTypes.Password,
-                            OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
-                            OpenIddictConstants.Permissions.Prefixes.Scope + "openid",
-                            OpenIddictConstants.Permissions.Prefixes.Scope + "profile",
-                            OpenIddictConstants.Permissions.Prefixes.Scope + "email",                            
+                            Permissions.Endpoints.Token,
+                            Permissions.Endpoints.Authorization,
+                            Permissions.GrantTypes.AuthorizationCode,
+                            Permissions.ResponseTypes.Code,
+                            Permissions.GrantTypes.Password,
+                            Permissions.GrantTypes.RefreshToken,
+                            Permissions.Scopes.Email,
+                            Permissions.Scopes.Profile,
+                            Permissions.Prefixes.Scope + postmanClientId,
+                            Permissions.Prefixes.Scope + "openid",                            
                         },
                         RedirectUris =
                         {

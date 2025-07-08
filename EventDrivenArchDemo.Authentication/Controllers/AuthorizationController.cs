@@ -34,12 +34,6 @@ namespace YourApp.Controllers
             _userManager = userManager;
         }
 
-        [HttpGet("~/test-auth")]
-        public IActionResult Test()
-        {
-            return Ok("Authorization controller is working!");
-        }
-
         [HttpGet("~/connect/authorize")]
         [HttpPost("~/connect/authorize")]
         [IgnoreAntiforgeryToken]
@@ -94,6 +88,7 @@ namespace YourApp.Controllers
 
         private void AddResourseOwnerDetails(OpenIddictRequest request, ClaimsIdentity identity)
         {
+            identity.SetAudiences(new[] { "EventDrivenArchDemo" });
             identity.SetScopes(request.GetScopes());
             var scopes = _scopeManager.ListResourcesAsync(identity.GetScopes());
             identity.SetResources(scopes.ToBlockingEnumerable());
@@ -206,7 +201,6 @@ namespace YourApp.Controllers
 
                     yield break;
 
-                // Never include the security stamp in the access and identity tokens, as it's a secret value.
                 case "AspNet.Identity.SecurityStamp": yield break;
 
                 default:
