@@ -27,10 +27,10 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=BookRentalShopDb.Authentication;User=sa;Password=Book@1234;TrustServerCertificate=True;MultipleActiveResultSets=true
-      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - ASPNETCORE_URLS=https://+:443
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
       - ASPNETCORE_Kestrel__Certificates__Default__Password=UnbreakableTitaniumPassword
-      - ISSUER_URL=https://eventdrivenarchdemo.authentication:443
+      - ISSUER_URL=https://localhost:8443
     volumes:
       - ./certs:/https:ro
     networks:
@@ -55,7 +55,7 @@ services:
       - RabbitMQ__UserName=guest
       - RabbitMQ__Password=guest
       - ASPNETCORE_URLS=http://0.0.0.0:80
-      - AUTH_SERVER_URL=https://eventdrivenarchdemo.authentication:443
+      - AUTH_SERVER_URL=https://localhost:8443
     networks:
       - app-network
 

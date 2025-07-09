@@ -5,9 +5,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
+using System;
 using System.Collections.Immutable;
 using System.Security.Claims;
 using static OpenIddict.Abstractions.OpenIddictConstants;
+using static System.Net.WebRequestMethods;
 
 namespace YourApp.Controllers
 {
@@ -39,6 +41,17 @@ namespace YourApp.Controllers
         [IgnoreAntiforgeryToken]
         public async Task<IActionResult> Authorize()
         {
+            Console.WriteLine($"Request Scheme: {Request.Scheme}");
+            Console.WriteLine($"Request Host: {Request.Host}");
+            Console.WriteLine($"Request Path: {Request.Path}");
+            Console.WriteLine($"Request QueryString: {Request.QueryString}");
+
+            // Log all headers
+            foreach (var header in Request.Headers)
+            {
+                Console.WriteLine($"Header {header.Key}: {header.Value}");
+            }
+
             var request = HttpContext.GetOpenIddictServerRequest() ??
                 throw new InvalidOperationException("The OpenID Connect request cannot be retrieved.");
 

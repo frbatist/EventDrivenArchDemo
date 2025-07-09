@@ -1,9 +1,24 @@
 using EventDrivenArchDemo.Authentication.Data;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor |
+                              ForwardedHeaders.XForwardedProto |
+                              ForwardedHeaders.XForwardedHost;
+
+    // Trust all proxies for development
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+
+    // Allow any host
+    options.AllowedHosts.Clear();
+});
 
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
@@ -23,7 +38,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddAuthentication();
 builder.Services.AddAuthorization();
 
-var issuerUrl = builder.Configuration["ISSUER_URL"] ?? "https://localhost:5003";
+var issuerUrl = builder.Configuration["ISSUER_URL"] ?? "https://localhost:8443";
 
 builder.Services.AddOpenIddict()
     .AddCore(options =>
@@ -34,27 +49,29 @@ builder.Services.AddOpenIddict()
     .AddServer(options =>
     {
 
-        options.SetIssuer(new Uri(issuerUrl));
+        options.SetIssuer(new Uri(issuerUrl))
 
-        //    options.SetIssuer(new Uri(issuerUrl))
-        //.SetTokenEndpointUris($"{issuerUrl}/connect/token")
-        //.SetUserInfoEndpointUris($"{issuerUrl}/connect/userinfo")
-        //.SetAuthorizationEndpointUris($"{issuerUrl}//connect/authorize")
-        //.SetIntrospectionEndpointUris($"{issuerUrl}/connect/introspect")
-        //.SetRevocationEndpointUris($"{issuerUrl}/connect/revoke")
-        //.SetJsonWebKeySetEndpointUris($"{issuerUrl}/.well-known/jwks");
+        
+    .SetTokenEndpointUris($"{issuerUrl}/connect/token")
+    .SetUserInfoEndpointUris($"{issuerUrl}/connect/userinfo")
+    .SetAuthorizationEndpointUris($"{issuerUrl}/connect/authorize")
+    .SetIntrospectionEndpointUris($"{issuerUrl}/connect/introspect")
+    .SetRevocationEndpointUris($"{issuerUrl}/connect/revoke")
+    .SetJsonWebKeySetEndpointUris($"{issuerUrl}/.well-known/jwks");
 
-        options.SetTokenEndpointUris("connect/token");
-        options.SetUserInfoEndpointUris("connect/userinfo");
-        options.SetAuthorizationEndpointUris("/connect/authorize");        
-        options.SetIntrospectionEndpointUris("connect/introspect");
-        options.SetRevocationEndpointUris("connect/revoke");
+        //options.SetTokenEndpointUris("connect/token");    
+        //options.SetUserInfoEndpointUris("connect/userinfo");
+        //options.SetAuthorizationEndpointUris("/connect/authorize");
+        //options.SetIntrospectionEndpointUris("connect/introspect");
+        //options.SetRevocationEndpointUris("connect/revoke");  
+
+
         options.AllowAuthorizationCodeFlow().AllowRefreshTokenFlow();        
         options.RegisterScopes("openid", "profile", "email");
 
 
 
-        
+
         options.UseAspNetCore()
                .EnableTokenEndpointPassthrough()
                .EnableAuthorizationEndpointPassthrough()
@@ -89,13 +106,14 @@ else
 {
     app.UseExceptionHandler("/Error");
 }
-app.UseStaticFiles();
 
-app.UseRouting();
+app.UseForwardedHeaders();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseStaticFiles();
+app.UseRouting();
 app.MapControllers();
 app.MapRazorPages();
 

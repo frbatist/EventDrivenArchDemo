@@ -42,26 +42,6 @@ builder.Services.AddAuthentication(options =>
     options.DefaultScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
 });
 
-//builder.Services.AddOpenIddict()
-//    .AddValidation(options =>
-//    {        
-//        // Get values from configuration
-//        var authConfig = builder.Configuration.GetSection("Authentication:OpenIddict");
-//        var issuerUrl = authConfig["IssuerUrl"] ?? "https://eventdrivenarchdemo.authentication:443";
-//        var audience = authConfig["Audience"] ?? "EventDrivenArchDemo.Api";
-//        var clientId = authConfig["ClientId"] ?? "EventDrivenArchDemo.Api";
-//        var clientSecret = authConfig["ClientSecret"] ?? "SuperSecretClientSecret";
-
-//        // Apply configuration
-//        options.SetIssuer(issuerUrl); 
-//        options.AddAudiences(audience);
-//        options.UseIntrospection()
-//               .SetClientId(clientId)
-//               .SetClientSecret(clientSecret);
-//        options.UseAspNetCore();        
-//        options.UseSystemNetHttp();
-//    });
-
 
 var issuerUrl = builder.Configuration["AUTH_SERVER_URL"] ?? "https://localhost:5003";
 var authConfig = builder.Configuration.GetSection("Authentication:OpenIddict");
