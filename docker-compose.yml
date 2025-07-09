@@ -1,11 +1,26 @@
 services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - "8080:80"   # API endpoint
+      - "8443:443"  # Auth endpoint
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/ssl:/etc/nginx/ssl
+      - ./certs:/etc/nginx/certs:ro
+    depends_on:
+      - eventdrivenarchdemo.authentication
+      - eventdrivenarchdemo.api
+    networks:
+      - app-network
+
   eventdrivenarchdemo.authentication:
     build:
       context: .
       dockerfile: EventDrivenArchDemo.Authentication/Dockerfile
-    ports:
-      - "5002:80"
-      - "5003:443"
+    expose:
+      - "80"
+      - "443"
     depends_on:
       sqlserver:
         condition: service_started
@@ -15,17 +30,19 @@ services:
       - ASPNETCORE_URLS=https://+:443;http://+:80
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
       - ASPNETCORE_Kestrel__Certificates__Default__Password=UnbreakableTitaniumPassword
-      - ISSUER_URL=https://localhost:5003
+      - ISSUER_URL=https://eventdrivenarchdemo.authentication:443
     volumes:
       - ./certs:/https:ro
+    networks:
+      - app-network
 
   eventdrivenarchdemo.api:
     image: ${DOCKER_REGISTRY-}eventdrivenarchdemoapi
     build:
       context: .
       dockerfile: EventDrivenArchDemo.Api/Dockerfile
-    ports:
-      - "5000:80"
+    expose:
+      - "80"
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -37,9 +54,10 @@ services:
       - RabbitMQ__HostName=rabbitmq
       - RabbitMQ__UserName=guest
       - RabbitMQ__Password=guest
-      - ASPNETCORE_URLS=http://+:8080
-      - AUTH_SERVER_URL=https://localhost:5003
-    network_mode: "host"
+      - ASPNETCORE_URLS=http://0.0.0.0:80
+      - AUTH_SERVER_URL=https://eventdrivenarchdemo.authentication:443
+    networks:
+      - app-network
 
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
@@ -49,6 +67,8 @@ services:
       - MSSQL_PID=Express
     ports:
       - "1433:1433"
+    networks:
+      - app-network
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -64,19 +84,23 @@ services:
       timeout: 3s
       retries: 10
       start_period: 10s
+    networks:
+      - app-network
 
   cosmosdb:
     image: mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:latest
     container_name: cosmosdb    
     environment:
-      - AZURE_COSMOS_EMULATOR_PARTITION_COUNT=3  # Reduced from 10
+      - AZURE_COSMOS_EMULATOR_PARTITION_COUNT=3
       - AZURE_COSMOS_EMULATOR_ENABLE_DATA_PERSISTENCE=false
     ports:
       - "8081:8081"
       - "10251:10251"
       - "10252:10252" 
       - "10253:10253"
-      - "10254:10254"  
+      - "10254:10254"
+    networks:
+      - app-network
 
   eventdrivenarchdemo.functions:
     image: ${DOCKER_REGISTRY-}eventdrivenarchdemofunctions
@@ -91,3 +115,9 @@ services:
     environment:
       - RabbitMQ=amqp://guest:guest@rabbitmq:5672/
       - CosmosDb=AccountEndpoint=https://cosmosdb:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==;DisableServerCertificateValidation=true
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
