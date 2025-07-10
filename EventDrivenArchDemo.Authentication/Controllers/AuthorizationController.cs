@@ -103,8 +103,11 @@ namespace YourApp.Controllers
         private void AddResourseOwnerDetails(OpenIddictRequest request, ClaimsIdentity identity)
         {            
             var requestedScopes = request.GetScopes();
-            var apiClientId = _configuration["ApiClient:ClientId"] ?? "EventDrivenArchDemo.Api";
-
+            var apiClientId = _configuration["Seed:ApiClient:ClientId"];
+            if (string.IsNullOrEmpty(apiClientId))
+            {
+                throw new InvalidOperationException("Configuration key 'ApiClient:ClientId' is missing or invalid.");
+            }
             var scopesToInclude = new List<string>();
             scopesToInclude.AddRange(requestedScopes.Where(scope =>
                 scope == Scopes.OpenId ||
