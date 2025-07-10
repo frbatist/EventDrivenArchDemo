@@ -4,25 +4,27 @@
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 USER $APP_UID
 WORKDIR /app
+EXPOSE 8080
 EXPOSE 80
+EXPOSE 443
 
 # This stage is used to build the service project
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["EventDrivenArchDemo.Api/EventDrivenArchDemo.Api.csproj", "EventDrivenArchDemo.Api/"]
-RUN dotnet restore "./EventDrivenArchDemo.Api/EventDrivenArchDemo.Api.csproj"
+COPY ["EventDrivenArchDemo.Authentication/EventDrivenArchDemo.Authentication.csproj", "EventDrivenArchDemo.Authentication/"]
+RUN dotnet restore "./EventDrivenArchDemo.Authentication/EventDrivenArchDemo.Authentication.csproj"
 COPY . .
-WORKDIR "/src/EventDrivenArchDemo.Api"
-RUN dotnet build "./EventDrivenArchDemo.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/src/EventDrivenArchDemo.Authentication"
+RUN dotnet build "./EventDrivenArchDemo.Authentication.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # This stage is used to publish the service project to be copied to the final stage
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./EventDrivenArchDemo.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./EventDrivenArchDemo.Authentication.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "EventDrivenArchDemo.Api.dll"]
+ENTRYPOINT ["dotnet", "EventDrivenArchDemo.Authentication.dll"]

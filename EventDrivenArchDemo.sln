@@ -9,6 +9,8 @@ Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-co
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventDrivenArchDemo.Functions", "EventDrivenArchDemo.Functions\EventDrivenArchDemo.Functions.csproj", "{B7B779C9-142C-4456-8EE9-F20DDB858956}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventDrivenArchDemo.Authentication", "EventDrivenArchDemo.Authentication\EventDrivenArchDemo.Authentication.csproj", "{0C298357-9BDA-4047-A7A8-3CECFE1E1C5D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{B7B779C9-142C-4456-8EE9-F20DDB858956}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B7B779C9-142C-4456-8EE9-F20DDB858956}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B7B779C9-142C-4456-8EE9-F20DDB858956}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0C298357-9BDA-4047-A7A8-3CECFE1E1C5D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C298357-9BDA-4047-A7A8-3CECFE1E1C5D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0C298357-9BDA-4047-A7A8-3CECFE1E1C5D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0C298357-9BDA-4047-A7A8-3CECFE1E1C5D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
