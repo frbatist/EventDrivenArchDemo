@@ -31,12 +31,16 @@ The solution implements a basic event-driven architecture with the following com
 - **CosmosDB Emulator**: Denormalized reporting database (containerized)
 - **RabbitMQ**: Event messaging infrastructure
 - **Azure Functions**: Containerized event handlers that process RabbitMQ messages and update reporting data
+- **Authentication Service**: OpenIddict-based OAuth2/OpenID Connect server
+- **Reverse Proxy**: Nginx for routing and load balancing
 
 ## Technology Stack
 
-- **Backend**: C# .NET
+- **Backend**: C# .NET 9.0
 - **Database**: SQL Server (Azure SQL Database)
 - **NoSQL Database**: CosmosDB Emulator (Docker) / Azure CosmosDB (optional)
+- **Authentication**: OpenIddict OAuth2/OpenID Connect
+- **Reverse Proxy**: Nginx
 - **Event Processing**: Azure Functions (containerized)
 - **Messaging**: RabbitMQ
 - **Containerization**: Docker & Docker Compose
@@ -47,7 +51,7 @@ The solution implements a basic event-driven architecture with the following com
 ### Prerequisites
 
 - Docker and Docker Compose
-- .NET SDK (version 8.0 or higher) - for development only
+- .NET SDK 9.0 or higher - for development only
 
 ### Configuration
 
@@ -57,10 +61,12 @@ git clone https://github.com/yourusername/EventDrivenArchDemo.git
 cd EventDrivenArchDemo
 ```
 
-2. The application runs completely out-of-the-box using Docker Compose with:
+2. The application uses Docker Compose to run:
    - SQL Server container for transactional data
    - CosmosDB Emulator container for reporting data
    - RabbitMQ container for messaging
+   - OpenIddict authentication service
+   - Nginx reverse proxy for routing
    - Azure Functions containers for event processing
 
 3. Optional: For testing with Azure CosmosDB in the cloud, you can:
@@ -72,24 +78,27 @@ cd EventDrivenArchDemo
 
 1. Start the entire application stack using Docker Compose:
 ```bash
-docker compose up -d (you can use docker-compose command if running docker compose 1.0)
+docker compose up -d
 ```
 
 2. The application will start with:
    - SQL Server database
    - CosmosDB Emulator
    - RabbitMQ message broker
+   - Authentication service (OpenIddict)
+   - Nginx reverse proxy
    - API application
    - Azure Functions containers (event handlers)
 
 3. Access the application:
-   - API: `http://localhost:5000` (or configured port)
+   - API (via Nginx): `http://localhost:8080`
+   - Authentication Service: `http://localhost:8443`
    - RabbitMQ Management UI: `http://localhost:15672` (guest/guest)
    - CosmosDB Emulator: `https://localhost:8081/_explorer/index.html`
 
 4. To stop the application:
 ```bash
-docker compose down (you can use docker-compose command if running docker compose 1.0)
+docker compose down
 ```
 
 ## Project Structure
@@ -119,6 +128,8 @@ EventDrivenArchDemo/
 This demo helps understand:
 - Basic event-driven architecture concepts
 - Azure Functions as containerized event handlers
+- OAuth2/OpenID Connect authentication with OpenIddict
+- Reverse proxy configuration with Nginx
 - RabbitMQ messaging patterns and triggers
 - Azure Functions bindings for minimal-code database operations
 - Data synchronization between different storage systems
@@ -130,7 +141,7 @@ This demo helps understand:
 This demo can be extended with the following enhancements:
 
 - **Service Integration**: Replace hardcoded calls to rent details endpoint with Azure Functions input bindings for better decoupling
-- **Authentication**: Implement authentication and authorization mechanisms across all services
+- **Enhanced Authentication**: Extend OpenIddict configuration with additional OAuth2 flows and scopes
 - **Frontend Application**: Add a web frontend to interact with the API and display real-time data
 - **Real-time Notifications**: Integrate SignalR or similar technology to provide real-time notifications when events are processed
 - **Enhanced Error Handling**: Add retry policies, dead letter queues, and comprehensive error handling
@@ -157,8 +168,14 @@ This project is created for educational and demonstration purposes only. It repr
 
 - [Azure Functions Documentation](https://docs.microsoft.com/en-us/azure/azure-functions/)
 - [Azure Functions with Containers](https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-function-linux-custom-image)
+- [OpenIddict Documentation](https://documentation.openiddict.com/)
+- [Nginx Documentation](https://nginx.org/en/docs/)
 - [Azure CosmosDB Emulator](https://docs.microsoft.com/en-us/azure/cosmos-db/local-emulator)
 - [RabbitMQ Documentation](https://www.rabbitmq.com/documentation.html)
 - [Docker Compose Documentation](https://docs.docker.com/compose/)
 - [Azure CosmosDB Documentation](https://docs.microsoft.com/en-us/azure/cosmos-db/)
 - [Event-Driven Architecture Patterns](https://docs.microsoft.com/en-us/azure/architecture/guide/architecture-styles/event-driven)
+
+---
+
+**Note**: Remember to replace placeholder values (like version numbers, specific paths, and your GitHub username) with actual values from your project.
