@@ -38,7 +38,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddAuthentication();
 builder.Services.AddAuthorization();
 
-var issuerUrl = builder.Configuration["ISSUER_URL"] ?? "https://localhost:8443";
+var issuerUrl = builder.Configuration["ISSUER_URL"] ?? "https://eventdrivenarchdemo.authentication:443";
 
 builder.Services.AddOpenIddict()
     .AddCore(options =>
@@ -48,35 +48,22 @@ builder.Services.AddOpenIddict()
     })
     .AddServer(options =>
     {
-
         options.SetIssuer(new Uri(issuerUrl))
-
-        
-    .SetTokenEndpointUris($"{issuerUrl}/connect/token")
-    .SetUserInfoEndpointUris($"{issuerUrl}/connect/userinfo")
-    .SetAuthorizationEndpointUris($"{issuerUrl}/connect/authorize")
-    .SetIntrospectionEndpointUris($"{issuerUrl}/connect/introspect")
-    .SetRevocationEndpointUris($"{issuerUrl}/connect/revoke")
-    .SetJsonWebKeySetEndpointUris($"{issuerUrl}/.well-known/jwks");
-
-        //options.SetTokenEndpointUris("connect/token");    
-        //options.SetUserInfoEndpointUris("connect/userinfo");
-        //options.SetAuthorizationEndpointUris("/connect/authorize");
-        //options.SetIntrospectionEndpointUris("connect/introspect");
-        //options.SetRevocationEndpointUris("connect/revoke");  
-
+            .SetTokenEndpointUris("connect/token")
+            .SetUserInfoEndpointUris("connect/userinfo")
+            .SetAuthorizationEndpointUris("connect/authorize")
+            .SetIntrospectionEndpointUris("connect/introspect")
+            .SetRevocationEndpointUris("connect/revoke")
+            .SetJsonWebKeySetEndpointUris(".well-known/jwks");
 
         options.AllowAuthorizationCodeFlow().AllowRefreshTokenFlow();        
         options.RegisterScopes("openid", "profile", "email");
 
-
-
-
         options.UseAspNetCore()
                .EnableTokenEndpointPassthrough()
                .EnableAuthorizationEndpointPassthrough()
-               .EnableUserInfoEndpointPassthrough()               
-               .EnableStatusCodePagesIntegration();
+               .EnableUserInfoEndpointPassthrough()
+               .EnableStatusCodePagesIntegration();               
 
         options.AddDevelopmentEncryptionCertificate()
                .AddDevelopmentSigningCertificate();
@@ -86,6 +73,7 @@ builder.Services.AddOpenIddict()
     {
         options.UseLocalServer();
         options.UseAspNetCore();
+        options.SetClaimsIssuer("https://eventdrivenarchdemo.authentication:443");
     });
 
 var app = builder.Build();

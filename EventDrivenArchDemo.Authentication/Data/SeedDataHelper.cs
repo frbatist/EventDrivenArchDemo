@@ -11,6 +11,7 @@ namespace EventDrivenArchDemo.Authentication.Data
             using var scope = services.CreateScope();
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
             var appManager = scope.ServiceProvider.GetRequiredService<IOpenIddictApplicationManager>();
+            var scopeManager = scope.ServiceProvider.GetRequiredService<IOpenIddictScopeManager>();
 
             // Admin user
             var adminEmail = config["Seed:AdminUser:Email"];
@@ -22,12 +23,11 @@ namespace EventDrivenArchDemo.Authentication.Data
                     var user = new IdentityUser { UserName = adminEmail, Email = adminEmail, EmailConfirmed = true };
                     await userManager.CreateAsync(user, adminPassword);
                 }
-            }           
-            
-            var scopeManager = scope.ServiceProvider.GetRequiredService<IOpenIddictScopeManager>();
+            }
 
             var apiClientId = config["Seed:ApiClient:ClientId"];
             var apiClientSecret = config["Seed:ApiClient:ClientSecret"];
+
             if (!string.IsNullOrWhiteSpace(apiClientId) && !string.IsNullOrWhiteSpace(apiClientSecret))
             {
                 // Create API scope
@@ -36,11 +36,12 @@ namespace EventDrivenArchDemo.Authentication.Data
                     await scopeManager.CreateAsync(new OpenIddictScopeDescriptor
                     {
                         Name = apiClientId,
-                        DisplayName = apiClientId,
+                        DisplayName = "EventDrivenArchDemo API",
                         Resources = { apiClientId }
                     });
                 }
 
+                // Create API client for introspection
                 var apiClient = await appManager.FindByClientIdAsync(apiClientId);
                 if (apiClient != null)
                 {
@@ -60,41 +61,44 @@ namespace EventDrivenArchDemo.Authentication.Data
                 });
             }
 
-
             // Postman OIDC client
             var postmanClientId = config["Seed:PostmanClient:ClientId"];
             var postmanClientSecret = config["Seed:PostmanClient:ClientSecret"];
+
             if (!string.IsNullOrWhiteSpace(postmanClientId) && !string.IsNullOrWhiteSpace(postmanClientSecret))
             {
-                if (await appManager.FindByClientIdAsync(postmanClientId) == null)
+                var postmanClient = await appManager.FindByClientIdAsync(postmanClientId);
+                if (postmanClient != null)
                 {
-                    await appManager.CreateAsync(new OpenIddictApplicationDescriptor
-                    {
-                        ClientId = postmanClientId,
-                        ClientSecret = postmanClientSecret,
-                        DisplayName = "Postman",
-                        Permissions =
-                        {
-                            Permissions.Endpoints.Token,
-                            Permissions.Endpoints.Authorization,
-                            Permissions.GrantTypes.AuthorizationCode,
-                            Permissions.ResponseTypes.Code,
-                            Permissions.GrantTypes.Password,
-                            Permissions.GrantTypes.RefreshToken,
-                            Permissions.Scopes.Email,
-                            Permissions.Scopes.Profile,
-                            Permissions.Prefixes.Scope + postmanClientId,
-                            Permissions.Prefixes.Scope + "openid",                            
-                        },
-                        RedirectUris =
-                        {
-                            new Uri("https://www.getpostman.com/oauth2/callback"),
-                            new Uri("https://oauth.pstmn.io/v1/callback"),
-                            new Uri("http://localhost:5000/api/Rents"),
-                        },
-                    });
+                    return;
                 }
+
+                await appManager.CreateAsync(new OpenIddictApplicationDescriptor
+                {
+                    ClientId = postmanClientId,
+                    ClientSecret = postmanClientSecret,
+                    DisplayName = "Postman",
+                    Permissions =
+                    {
+                        Permissions.Endpoints.Token,
+                        Permissions.Endpoints.Authorization,
+                        Permissions.GrantTypes.AuthorizationCode,
+                        Permissions.ResponseTypes.Code,
+                        Permissions.GrantTypes.Password,
+                        Permissions.GrantTypes.RefreshToken,
+                        Permissions.Scopes.Email,
+                        Permissions.Scopes.Profile,
+                        Permissions.Prefixes.Scope + "openid",
+                        Permissions.Prefixes.Scope + apiClientId, 
+                    },
+                    RedirectUris =
+                    {
+                        new Uri("https://www.getpostman.com/oauth2/callback"),
+                        new Uri("https://oauth.pstmn.io/v1/callback"),
+                        new Uri("http://localhost:5000/api/Rents"),
+                    },
+                });
             }
-        }        
+        }
     }
 }

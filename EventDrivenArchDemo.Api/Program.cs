@@ -1,12 +1,9 @@
 using EventDrivenArchDemo.Api.Data;
 using EventDrivenArchDemo.Api.Domain.Messaging;
 using EventDrivenArchDemo.Api.Infra.Messaging;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Http;
-using Microsoft.IdentityModel.Tokens;
 using OpenIddict.Validation.AspNetCore;
-
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +11,7 @@ var sqlConnectionString = builder.Configuration.GetConnectionString("DefaultConn
 builder.Services.AddDbContext<BookRentalShopContext>(options =>
     options.UseSqlServer(sqlConnectionString));
 
+// Configure certificate trust for Docker
 if (builder.Environment.IsDevelopment())
 {
     builder.Services.ConfigureAll<HttpClientFactoryOptions>(options =>
@@ -23,7 +21,7 @@ if (builder.Environment.IsDevelopment())
             if (handlerBuilder.PrimaryHandler is HttpClientHandler handler)
             {
                 handler.ServerCertificateCustomValidationCallback = (message, cert, chain, sslPolicyErrors) =>
-                {                    
+                {
                     return true;
                 };
             }
@@ -37,68 +35,36 @@ builder.Services.AddLogging(logging =>
     logging.SetMinimumLevel(LogLevel.Debug);
 });
 
+var authServerUrl = builder.Configuration["AUTH_SERVER_URL"] ?? "https://eventdrivenarchdemo.authentication:443";
+var authConfig = builder.Configuration.GetSection("Authentication:OpenIddict");
+var clientId = authConfig["ClientId"] ?? "EventDrivenArchDemo.Api";
+var clientSecret = authConfig["ClientSecret"] ?? "SuperSecretClientSecret";
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
 });
 
-
-var issuerUrl = builder.Configuration["AUTH_SERVER_URL"] ?? "https://localhost:5003";
-var authConfig = builder.Configuration.GetSection("Authentication:OpenIddict");
-var audience = authConfig["Audience"] ?? "EventDrivenArchDemo.Api";
-
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
+builder.Services.AddOpenIddict()
+    .AddValidation(options =>
     {
-        options.Authority = issuerUrl;
-        options.Audience = audience;
-        options.RequireHttpsMetadata = true;
+        options.SetIssuer(authServerUrl);
+        options.AddAudiences(clientId);
 
-        if (builder.Environment.IsDevelopment())
-        {
-            options.BackchannelHttpHandler = new HttpClientHandler()
-            {
-                ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
-            };
-        }
+        options.UseIntrospection()
+               .SetClientId(clientId)
+               .SetClientSecret(clientSecret);
 
-        options.TokenValidationParameters = new TokenValidationParameters
+        options.UseSystemNetHttp();
+        options.UseAspNetCore();
+
+        options.Configure(opt =>
         {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = issuerUrl,
-            ValidAudience = audience,
-            ClockSkew = TimeSpan.Zero
-        };
+            Console.WriteLine("OpenIddict validation configured");
+        });
     });
 
 builder.Services.AddAuthorization();
-
-builder.Services.Configure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
-{
-    options.Events = new JwtBearerEvents
-    {
-        OnAuthenticationFailed = context =>
-        {
-            Console.WriteLine($"JWT Authentication failed: {context.Exception.Message}");
-            return Task.CompletedTask;
-        },
-        OnTokenValidated = context =>
-        {
-            Console.WriteLine("JWT Token validated successfully");
-            var claims = context.Principal.Claims.Select(c => $"{c.Type}: {c.Value}");
-            Console.WriteLine($"Claims: {string.Join(", ", claims)}");
-            return Task.CompletedTask;
-        },
-        OnChallenge = context =>
-        {
-            Console.WriteLine($"JWT Challenge: {context.Error}, {context.ErrorDescription}");
-            return Task.CompletedTask;
-        }
-    };
-});
 
 // Add services to the container.
 builder.Services.AddControllers();

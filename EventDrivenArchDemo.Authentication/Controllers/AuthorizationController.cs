@@ -18,22 +18,23 @@ namespace YourApp.Controllers
     {
         private readonly IOpenIddictApplicationManager _applicationManager;
         private readonly IOpenIddictAuthorizationManager _authorizationManager;
-        private readonly IOpenIddictScopeManager _scopeManager;
-        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly IOpenIddictScopeManager _scopeManager;        
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly IConfiguration _configuration;
 
         public AuthorizationController(
             IOpenIddictApplicationManager applicationManager,
             IOpenIddictAuthorizationManager authorizationManager,
             IOpenIddictScopeManager scopeManager,
             SignInManager<IdentityUser> signInManager,
-            UserManager<IdentityUser> userManager)
+            UserManager<IdentityUser> userManager,
+            IConfiguration configuration)
         {
             _applicationManager = applicationManager;
             _authorizationManager = authorizationManager;
-            _scopeManager = scopeManager;
-            _signInManager = signInManager;
+            _scopeManager = scopeManager;            
             _userManager = userManager;
+            _configuration=configuration;
         }
 
         [HttpGet("~/connect/authorize")]
@@ -100,9 +101,20 @@ namespace YourApp.Controllers
         }
 
         private void AddResourseOwnerDetails(OpenIddictRequest request, ClaimsIdentity identity)
-        {
-            identity.SetAudiences(new[] { "EventDrivenArchDemo" });
-            identity.SetScopes(request.GetScopes());
+        {            
+            var requestedScopes = request.GetScopes();
+            var apiClientId = _configuration["ApiClient:ClientId"] ?? "EventDrivenArchDemo.Api";
+
+            var scopesToInclude = new List<string>();
+            scopesToInclude.AddRange(requestedScopes.Where(scope =>
+                scope == Scopes.OpenId ||
+                scope == Scopes.Profile ||
+                scope == Scopes.Email ||
+                scope == apiClientId));
+
+            identity.SetScopes(scopesToInclude);
+            identity.SetAudiences(new[] { apiClientId });
+
             var scopes = _scopeManager.ListResourcesAsync(identity.GetScopes());
             identity.SetResources(scopes.ToBlockingEnumerable());
         }
